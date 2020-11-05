@@ -1,0 +1,284 @@
+<html>
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/i333463/openSource/odatajs-4.0.0.min.js"></script>
+    </head>
+    <body>
+        <div>
+            <pre> Message ↓ <code id="message" style="width:max-content!important;"></code></pre>
+            <div>
+                <form id="myform">
+                    <div class="form-group">
+                        <input type="text" id="tcname" size=50 class="form-control" placeholder="Test Case Name:" required>
+                        <input type="hidden" id="interchangeId" value= "&#123&#123interchangeId&#125&#125" size=20>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="constraints" size=50 class="form-control" placeholder="Constraints Covered:" required>
+                    </div>
+                    <div>
+                        <pre> Test Case (JSON format) ↓ <code style="width:max-content!important;" id="copyText">${text}</code></pre>
+                    </div>
+                </form>
+            </div>
+            <button class="copyButton" type="button" data-clipboard-action="copy" data-clipboard-target="#copyText" style="background:green;color:white;">Copy to Clipboard
+            </button>
+            <button onclick="createTestCase()" id="createTC" type="button" style="background:blue;color:white;">Create Test Case
+            </button>
+        </div>
+        <div>
+            <pre> CONTRL Response ↓ <code style="width:max-content!important;" id="contrl">${contrl}</code></pre>
+        </div>
+        <div>
+            <pre> APERAK Response ↓ <code style="width:max-content!important;" id="aperak">${aperak}</code></pre>
+        </div>
+    </body>
+</html>
+
+<script>
+    var clipboard = new ClipboardJS('.copyButton');
+    clipboard.on('success', function(e) {
+        e.clearSelection();
+        e.trigger.textContent = 'Copied!';
+        window.setTimeout(function() {
+            e.trigger.textContent = 'Copy to Clipboard';
+        }, 2000);
+    });
+    clipboard.on('error', function(e) {
+        e.clearSelection();
+        e.trigger.textContent = '✗ Not Copied';
+        window.setTimeout(function() {
+            e.trigger.textContent = 'Copy to Clipboard';
+        }, 2000);
+    });
+
+    // check input parameters
+    function checkInput(tcname, constraints){
+        if (tcname == null || tcname == ""){
+            return false
+        } ;
+        if (constraints == null || constraints == ""){
+            return false
+        } ;
+        return true;
+    }
+
+    // Build a Request
+    function buildRequest(type, data, testCaseId, constraints, testCaseEntity){
+
+        let uri = "";
+        let headers = {  
+            "Content-Type": "application/json", 
+            "Accept": "application/json", 
+            "Authorization": "Bearer " + data.token
+            };
+        let method = "";
+        let body = null;
+
+        switch (type){
+
+            case "getTestCaseByName":
+                uri = "TestCaseMain?$filter=testCaseId eq " + "'" + testCaseId +"'";
+                method = "GET";
+                body = null;
+                break;
+
+            case "copy":
+                uri = "TestCaseMain(ID=" + data.templateId + ",IsActiveEntity=true)/TestCaseService.copy";
+                method = "POST";
+                body = null;
+                break;
+
+            case "draftActivate":
+                uri = "TestCaseMain(ID=" + testCaseEntity.ID + ",IsActiveEntity=false)/TestCaseService.draftActivate";
+                method = "POST";
+                body = null;
+                break;
+
+            case "getTestCaseById":
+                uri = "TestCaseMain(ID=" + testCaseEntity.ID + ",IsActiveEntity=true)?$expand=input,inputVars,expResults";
+                method = "GET";
+                body = null;
+                break;
+
+            case "update":
+                uri = "TestCaseMain(ID=" + testCaseEntity.ID + ",IsActiveEntity=true)";
+                method = "PATCH";
+
+                console.log(testCaseEntity);
+
+                // TestCaseMain
+                let testCaseUpdated = testCaseEntity;
+                testCaseUpdated.createdBy = data.user;
+                testCaseUpdated.testCaseId = testCaseId;
+                testCaseUpdated.testCategory = "Regression";
+                testCaseUpdated.testVersion = "0.0.1";
+
+                // Input
+                testCaseUpdated.input.techMessageId = data.messageRes.TechnicalMsgId;
+                        // "version": "5.2a",
+                testCaseUpdated.input.businessIdentifier = data.messageRes.BusinessIdentifier;
+                testCaseUpdated.input.senderId = data.testCaseJSON.testData.sender;
+                testCaseUpdated.input.receiverId = data.testCaseJSON.testData.receiver;
+                let t = document.getElementById("myform").elements.namedItem("interchangeId").value;
+                testCaseUpdated.input.testFixData = data.testCaseJSON.testData.message.replace(new RegExp("&#123&#123interchangeId&#125&#125",'g'), t);
+
+                console.log(testCaseUpdated.input.testFixData);
+
+                // Expected Result
+                for (i in testCaseUpdated.expResults){
+                    let outputData = {
+                        "payload_ext":""
+                    }
+                    // CONTRL
+                    if (testCaseUpdated.expResults[i].cp_ID == "d05eb02f-677a-4edf-914b-ad085e0a9069"){
+                        outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseCONTRL;
+                        testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
+                    }
+                    // APERAK
+                    if (testCaseUpdated.expResults[i].cp_ID == "d05eb02f-677a-4edf-914b-ad085e0a9068"){
+                        outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseAPERAK;
+                        testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
+                    }
+                }
+
+                for(j in testCaseUpdated.inputVars){
+                    if (testCaseUpdated.inputVars[j].varNm == "messageStatus" ){
+                        testCaseUpdated.inputVars[j].varValExpr = data.testCaseJSON.expectedTestResult.messageStatusDesc;
+                    }
+                    if (testCaseUpdated.inputVars[j].varNm == "constraintName" ){
+                        testCaseUpdated.inputVars[j].varValExpr = constraints;
+                    }
+                }
+
+                console.log(testCaseUpdated);
+                body = testCaseUpdated;
+                break;
+
+            default:
+                
+        }
+
+        return {
+            requestUri: data.serviceRoot + uri,
+            method: method,
+            headers: headers,
+            data: body
+        };
+    }
+
+    // Copy From Template
+    function copyFromTemplate(vizdata, testCaseId, constraints){
+        // send copy request
+        let request = buildRequest("copy", vizdata, testCaseId, constraints, null);
+        odatajs.oData.request(
+            request, 
+            function (data, response) {
+                draftActivate(vizdata, testCaseId, constraints, response.data);
+            },
+            function (err) {
+                document.getElementById("message").innerHTML = err.Message;
+                document.getElementById("message").setAttribute("style","width:max-content!important;color:red;");
+                alert("Error occured, please check log in console!");
+            }
+        );
+    }
+
+    // Draft Activate
+    function draftActivate(vizdata, testCaseId, constraints, newCreatedTC){
+        // send activation request
+        let request = buildRequest("draftActivate", vizdata, testCaseId, constraints, newCreatedTC);
+        odatajs.oData.request(
+            request, 
+            function (data, response) {
+                updateTestCase(vizdata, testCaseId, constraints, response.data);
+            },
+            function (err) {
+                document.getElementById("message").innerHTML = err.Message;
+                document.getElementById("message").setAttribute("style","width:max-content!important;color:red;");
+                alert("Error occured, please check log in console!");
+            }
+        );
+    }
+
+    // Update Test Case
+    function updateTestCase(vizdata, testCaseId, constraints, testCaseEntity){
+
+        // send GET request
+        let request = buildRequest("getTestCaseById", vizdata, testCaseId, constraints, testCaseEntity);
+        odatajs.oData.request(
+            request, 
+            function (data, response) {
+                // send PATCH request
+                let request = buildRequest("update", vizdata, testCaseId, constraints, response.data);
+                odatajs.oData.request(
+                    request, 
+                    function (data, response) {
+                        document.getElementById("createTC").innerHTML = "Created!";
+                        document.getElementById("message").innerHTML = "Test Case was created/updated successfully!";
+                        document.getElementById("message").setAttribute("style","width:max-content!important;color:green;");
+                        alert("Test Case was created/updated successfully!");
+                    },
+                    function (err) {
+                        document.getElementById("message").innerHTML = err.Message;
+                        document.getElementById("message").setAttribute("style","width:max-content!important;color:red;");
+                        alert("Error occured, please check log in console!");
+                    }
+                );
+            },
+            function (err) {
+                document.getElementById("message").innerHTML = err.Message;
+                document.getElementById("message").setAttribute("style","width:max-content!important;color:red;");
+                alert("Error occured, please check log in console!");
+            }
+        );
+    }
+
+    // create test case to devops
+    function createTestCase(){
+
+        // Check Input Parameters
+        let tcname = document.getElementById("myform").elements.namedItem("tcname").value;
+        let constraints = document.getElementById("myform").elements.namedItem("constraints").value;
+        if (!checkInput(tcname, constraints)){
+            document.getElementById("message").innerHTML = "Input all required parameters!";
+            document.getElementById("message").setAttribute("style","width:max-content!important;color:red;");
+            alert("Input all required parameters!");
+            return;
+        }
+
+        // callback to get data
+        pm.getData(function (err, vizdata) {
+
+            // Test Case Id (should be uniqua)
+            let testCaseId = "APERAK-" + vizdata.messageRes.TechnicalMsgId + "-" + vizdata.messageRes.BusinessIdentifier + "-" + tcname; 
+
+            // check Test Case exists or not
+            let request = buildRequest("getTestCaseByName",vizdata, testCaseId, constraints, null);
+            odatajs.oData.request(
+                request, 
+                function (data, response) {
+                    // dosen't exist, copy a new one from template
+                    if (response.data.value == null || response.data.value.length == 0){
+                        copyFromTemplate(vizdata, testCaseId, constraints);
+                    }
+                    // existed, update content
+                    else{
+                        let text = "Test Case: " + testCaseId + " exists already, do you want to update it?"
+                        let r = confirm(text);
+                        if (r == true) {
+                            updateTestCase(vizdata, testCaseId, constraints, response.data.value[0]);
+                        } else {
+                            alert("Update was cancelled!");
+                        }
+                    }
+                },
+                function (err) {
+                    document.getElementById("message").innerHTML = err.Message;
+                    document.getElementById("message").setAttribute("style","width:max-content!important;color:red;");
+                    alert("Error occured, please check log in console!");
+                }
+            );
+        }); 
+    }
+</script>
