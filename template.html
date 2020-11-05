@@ -17,7 +17,7 @@
                         <input type="text" id="constraints" size=50 class="form-control" placeholder="Constraints Covered:" required>
                     </div>
                     <div>
-                        <pre> Test Case (JSON format) ↓ <code style="width:max-content!important;" id="copyText">${text}</code></pre>
+                        <pre> Test Case (JSON format) ↓ <code style="width:max-content!important;" id="copyText"></code></pre>
                     </div>
                 </form>
             </div>
@@ -27,11 +27,18 @@
             </button>
         </div>
         <div>
-            <pre> CONTRL Response ↓ <code style="width:max-content!important;" id="contrl">${contrl}</code></pre>
+            <pre> CONTRL Response ↓ <code style="width:max-content!important;" id="contrl"></code></pre>
         </div>
         <div>
-            <pre> APERAK Response ↓ <code style="width:max-content!important;" id="aperak">${aperak}</code></pre>
+            <pre> APERAK Response ↓ <code style="width:max-content!important;" id="aperak"></code></pre>
         </div>
+        <script>
+            pm.getData(function (err, vizdata) {
+                document.getElementById("copyText").innerHTML = vizdata.jsonDom;
+                document.getElementById("contrl").innerHTML = vizdata.contrl;
+                document.getElementById("aperak").innerHTML = vizdata.aperak;
+            });
+        </script>
     </body>
 </html>
 
