@@ -163,8 +163,6 @@
                         outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseAPERAK;
                         testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
 
-                        let cmpRules = [];
-
                         // Delete comparison rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
                         let cmpRules = deleteCmpRules(data, testCaseUpdated.expResults[i].cmpRules);
                         
