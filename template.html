@@ -142,50 +142,54 @@
 
                 // Expected Result
                 for (i in testCaseUpdated.expResults){
+
+                    // output data
                     let outputData = {
                         "payload_ext":""
                     }
+
                     // CONTRL
                     if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_CONTRL"){
+                        // output data
                         outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseCONTRL;
                         testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
                     }
+
                     // APERAK
                     if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_APERAK"){
+                        // output data
                         outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseAPERAK;
                         testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
+
+                        // Delete comparison rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
+                        let deletedCount = deleteCmpRules(data, testCaseUpdated.expResults[i].cmpRules);
+
+                        // Build new Comparison Rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
+                        let cmpRules = [];
+
+                        // count of the aperak error messages
                         let count = countAPERAKMessage("FTX+ABO", "RFF+", outputData.payload_ext);
-                        let cmpRule ={
-                            "seq": 0,
-                            "columnNm":"",
-                            "exptVal":"",
-                            "valueSrc":"",
-                            "skipCheck":false
-                        }
+                        
                         if (count < 1){
                             // to do ERROR
                         }
-                        if (count == 1){
 
-                            testCaseUpdated.expResults[i].cmpRules.push(
+                        if (count == 1){
+                            cmpRules.push(
                                 {   "expRes_ID":testCaseUpdated.expResults[i].ID,
-                                    "seq": testCaseUpdated.expResults[i].cmpRules.length + 1,
+                                    "seq": (testCaseUpdated.expResults[i].cmpRules.length - deletedCount) + 1,
                                     "columnNm":"/APERAK/SG4/SG5[1]/RFF/C506/1154",
                                     "exptVal":"",
                                     "valueSrc":"",
                                     "skipCheck":true
-                                });
-
-                            // let number = testCaseUpdated.expResults[i].cmpRules.length + 1;
-                            // let columnNm = "/APERAK/SG4/SG5[1]/RFF/C506/1154";
-                            // let skipCheck = true;
-                            
+                                });   
                         }
+
                         if (count > 1){
                             for(k=1; k<=count; k++){
-                                testCaseUpdated.expResults[i].cmpRules.push(
+                                cmpRules.push(
                                 {   "expRes_ID":testCaseUpdated.expResults[i].ID,
-                                    "seq": testCaseUpdated.expResults[i].cmpRules.length + 1,
+                                    "seq": (testCaseUpdated.expResults[i].cmpRules.length - deletedCount) + 1,
                                     "columnNm":"/APERAK/SG4[" + k + "]/SG5[1]/RFF/C506/1154",
                                     "exptVal":"",
                                     "valueSrc":"",
@@ -193,16 +197,23 @@
                                 });
                             }
                         }
+
+                        testCaseUpdated.expResults[i].cmpRules = cmpRules;
                     }
 
                     // Check Points
                     testCaseUpdated.expResults[i].cp = null;
                 }
 
-
                 body = testCaseUpdated;
                 break;
 
+            case "deleteRule":
+                uri = "TestCaseResCmpRule(ID=" + testCaseId + ",IsActiveEntity=true)";
+                method = "DELETE";
+                body = null;
+                break;
+            
             default:
                 
         }
@@ -222,6 +233,8 @@
 
         // remove line break
         let string = message.toString().replace(/(\r\n|\n|\r)/gm, "");
+
+        // Split with '
         let list = string.split("'");
 
         let countFlag = false;
@@ -235,18 +248,41 @@
 
             // Switch Off
             if (countFlag && item.startsWith(endsWith)){
-                countFlag = false;
-            }
-
-            // push the item
-            if (countFlag){
                 count++;
+                countFlag = false;
             }
         });
 
         return count;
     }
     
+    // Delete Comparison Rule
+    function deleteCmpRules(vizdata, cmpRules){
+
+        let count = 0;
+
+        // Comparison Rules
+        for (i in cmpRules){
+
+            // to delete
+            if (cmpRules[i].columnNm.startsWith("/APERAK/SG4")
+                && cmpRules[i].columnNm.endsWith("/SG5[1]/RFF/C506/1154")){
+                // send delete request
+                let request = buildRequest("deleteRule", vizdata, cmpRules[i].ID, null, null);
+                odatajs.oData.request(
+                    request, 
+                    function (data, response) {
+                    },
+                    function (err) {
+                    }
+                );
+                // count++
+                count++;
+            }
+        }
+
+        return count;
+    }
     
     // Copy From Template
     function copyFromTemplate(vizdata, testCaseId, constraints){
