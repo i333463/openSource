@@ -148,6 +148,8 @@
                         "payload_ext":""
                     }
 
+                    console.log(testCaseUpdated.expResults[i]);
+
                     // CONTRL
                     if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_CONTRL"){
                         // output data
@@ -181,28 +183,32 @@
                                     "columnNm":"/APERAK/SG4/SG5[1]/RFF/C506/1154",
                                     "exptVal":"",
                                     "valueSrc":"",
-                                    "skipCheck":true
-                                });   
+                                    "skipCheck":true }
+                            );   
                         }
 
                         if (count > 1){
                             for(k=1; k<=count; k++){
                                 cmpRules.push(
-                                {   "expRes_ID":testCaseUpdated.expResults[i].ID,
-                                    "seq": (testCaseUpdated.expResults[i].cmpRules.length - deletedCount) + 1,
-                                    "columnNm":"/APERAK/SG4[" + k + "]/SG5[1]/RFF/C506/1154",
-                                    "exptVal":"",
-                                    "valueSrc":"",
-                                    "skipCheck":true
-                                });
+                                    {   "expRes_ID":testCaseUpdated.expResults[i].ID,
+                                        "seq": (testCaseUpdated.expResults[i].cmpRules.length - deletedCount) + 1,
+                                        "columnNm":"/APERAK/SG4[" + k + "]/SG5[1]/RFF/C506/1154",
+                                        "exptVal":"",
+                                        "valueSrc":"",
+                                        "skipCheck":true }
+                                );
                             }
                         }
 
                         testCaseUpdated.expResults[i].cmpRules = cmpRules;
                     }
 
+                    console.log(cmpRules);
+
                     // Check Points
                     testCaseUpdated.expResults[i].cp = null;
+
+                
                 }
 
                 body = testCaseUpdated;
