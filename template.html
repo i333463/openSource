@@ -274,14 +274,14 @@
             if (cmpRules[m].columnNm.startsWith("/APERAK/SG4")
                 && cmpRules[m].columnNm.endsWith("/SG5[1]/RFF/C506/1154")){
                 // send delete request
-                let request = buildRequest("deleteRule", vizdata, cmpRules[m].ID, null, null);
-                odatajs.oData.request(
-                    request, 
-                    function (data, response) {
-                    },
-                    function (err) {
-                    }
-                );
+                // let request = buildRequest("deleteRule", vizdata, cmpRules[m].ID, null, null);
+                // odatajs.oData.request(
+                //     request, 
+                //     function (data, response) {
+                //     },
+                //     function (err) {
+                //     }
+                // );
 
             }else{
                 rules.push(cmpRules[m]);
