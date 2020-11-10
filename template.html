@@ -164,7 +164,7 @@
                         testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
 
                         // Delete comparison rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
-                        let cmpRules = deleteCmpRules(data, testCaseUpdated.expResults[i].cmpRules);
+                        let cmpRules = deleteCmpRules(testCaseUpdated.expResults[i].cmpRules);
                         
                         // count of the aperak error messages
                         let count = countAPERAKMessage("FTX+ABO", "RFF+", outputData.payload_ext);
@@ -213,12 +213,6 @@
 
                 body = testCaseUpdated;
                 break;
-
-            case "deleteRule":
-                uri = "TestCaseResCmpRule(ID=" + testCaseId + ",IsActiveEntity=true)";
-                method = "DELETE";
-                body = null;
-                break;
             
             default:
                 
@@ -263,7 +257,7 @@
     }
     
     // Delete Comparison Rule
-    function deleteCmpRules(vizdata, cmpRules){
+    function deleteCmpRules(cmpRules){
 
         let rules = []
 
@@ -273,16 +267,7 @@
             // to delete
             if (cmpRules[m].columnNm.startsWith("/APERAK/SG4")
                 && cmpRules[m].columnNm.endsWith("/SG5[1]/RFF/C506/1154")){
-                //send delete request
-                let request = buildRequest("deleteRule", vizdata, cmpRules[m].ID, null, null);
-                // odatajs.oData.request(
-                //     request, 
-                //     function (data, response) {
-                //     },
-                //     function (err) {
-                //     }
-                // );
-
+                    // nothing
             }else{
                 rules.push(cmpRules[m]);
             }
