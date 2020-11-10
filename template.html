@@ -179,7 +179,7 @@
                                 {   "expRes_ID":testCaseUpdated.expResults[i].ID,
                                     "seq": cmpRules.length + 1,
                                     "columnNm":"/APERAK/SG4/SG5[1]/RFF/C506/1154",
-                                    "exptVal":"",
+                                    "exptVal":"interchangeId",
                                     "valueSrc":"",
                                     "skipCheck":true }
                             );   
@@ -189,11 +189,12 @@
                         if (count > 1){
                             let seq = cmpRules.length;
                             for(k=1; k<=count; k++){
+                                seq++;
                                 cmpRules.push(
                                     {   "expRes_ID":testCaseUpdated.expResults[i].ID,
-                                        "seq": seq++,
+                                        "seq": seq,
                                         "columnNm":"/APERAK/SG4[" + k + "]/SG5[1]/RFF/C506/1154",
-                                        "exptVal":"",
+                                        "exptVal":"interchangeId",
                                         "valueSrc":"",
                                         "skipCheck":true }
                                 );
