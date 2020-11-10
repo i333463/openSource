@@ -148,9 +148,7 @@
                         "payload_ext":""
                     }
 
-                    let cmpRules = [];
-
-                    console.log(testCaseUpdated.expResults[i]);
+                    // console.log(testCaseUpdated.expResults[i]);
 
                     // CONTRL
                     if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_CONTRL"){
@@ -165,22 +163,23 @@
                         outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseAPERAK;
                         testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
 
-                        // Delete comparison rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
-                        let deletedCount = deleteCmpRules(data, testCaseUpdated.expResults[i].cmpRules);
-                        
+                        let cmpRules = [];
 
+                        // Delete comparison rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
+                        let cmpRules = deleteCmpRules(data, testCaseUpdated.expResults[i].cmpRules);
+                        
                         // count of the aperak error messages
                         let count = countAPERAKMessage("FTX+ABO", "RFF+", outputData.payload_ext);
                         
-                        // Build new Comparison Rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
                         if (count < 1){
                             // to do ERROR
                         }
 
+                        // Build new Comparison Rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
                         if (count == 1){
                             cmpRules.push(
                                 {   "expRes_ID":testCaseUpdated.expResults[i].ID,
-                                    "seq": (testCaseUpdated.expResults[i].cmpRules.length - deletedCount) + 1,
+                                    "seq": cmpRules.length + 1,
                                     "columnNm":"/APERAK/SG4/SG5[1]/RFF/C506/1154",
                                     "exptVal":"",
                                     "valueSrc":"",
@@ -188,11 +187,13 @@
                             );   
                         }
 
+                        // Build new Comparison Rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
                         if (count > 1){
+                            let seq = cmpRules.length;
                             for(k=1; k<=count; k++){
                                 cmpRules.push(
                                     {   "expRes_ID":testCaseUpdated.expResults[i].ID,
-                                        "seq": (testCaseUpdated.expResults[i].cmpRules.length - deletedCount) + 1,
+                                        "seq": seq++,
                                         "columnNm":"/APERAK/SG4[" + k + "]/SG5[1]/RFF/C506/1154",
                                         "exptVal":"",
                                         "valueSrc":"",
@@ -200,16 +201,15 @@
                                 );
                             }
                         }
-                    }
 
-                    console.log(cmpRules);
+                        // rules
+                        testCaseUpdated.expResults[i].cmpRules = cmpRules;
+                        console.log(cmpRules);
+                    }
 
                     // Check Points
                     testCaseUpdated.expResults[i].cp = null;
-                    // rules
-                    testCaseUpdated.expResults[i].cmpRules = cmpRules;
 
-                
                 }
 
                 body = testCaseUpdated;
@@ -266,7 +266,7 @@
     // Delete Comparison Rule
     function deleteCmpRules(vizdata, cmpRules){
 
-        let count = 0;
+        let rules = []
 
         // Comparison Rules
         for (i in cmpRules){
@@ -283,12 +283,13 @@
                     function (err) {
                     }
                 );
-                // count++
-                count++;
+
+            }else{
+                newRules.push(cmpRules[i]);
             }
         }
 
-        return count;
+        return rules;
     }
     
     // Copy From Template
