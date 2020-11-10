@@ -103,7 +103,7 @@
                 break;
 
             case "getTestCaseById":
-                uri = "TestCaseMain(ID=" + testCaseEntity.ID + ",IsActiveEntity=true)?$expand=input,inputVars,expResults";
+                uri = "TestCaseMain(ID=" + testCaseEntity.ID + ",IsActiveEntity=true)?$expand=input,inputVars,expResults($expand=cp,cmpRules)";
                 method = "GET";
                 body = null;
                 break;
@@ -130,25 +130,7 @@
                 let t = document.getElementById("myform").elements.namedItem("interchangeId").value;
                 testCaseUpdated.input.testFixData = data.testCaseJSON.testData.message.replace(new RegExp("&#123&#123interchangeId&#125&#125",'g'), t);
 
-                console.log(testCaseUpdated.input.testFixData);
-
-                // Expected Result
-                for (i in testCaseUpdated.expResults){
-                    let outputData = {
-                        "payload_ext":""
-                    }
-                    // CONTRL
-                    if (testCaseUpdated.expResults[i].cp_ID == "d05eb02f-677a-4edf-914b-ad085e0a9069"){
-                        outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseCONTRL;
-                        testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
-                    }
-                    // APERAK
-                    if (testCaseUpdated.expResults[i].cp_ID == "d05eb02f-677a-4edf-914b-ad085e0a9068"){
-                        outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseAPERAK;
-                        testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
-                    }
-                }
-
+                // Input Variables
                 for(j in testCaseUpdated.inputVars){
                     if (testCaseUpdated.inputVars[j].varNm == "messageStatus" ){
                         testCaseUpdated.inputVars[j].varValExpr = data.testCaseJSON.expectedTestResult.messageStatusDesc;
@@ -158,7 +140,60 @@
                     }
                 }
 
-                console.log(testCaseUpdated);
+                // Expected Result
+                for (i in testCaseUpdated.expResults){
+                    let outputData = {
+                        "payload_ext":""
+                    }
+                    // CONTRL
+                    if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_CONTRL"){
+                        outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseCONTRL;
+                        testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
+                    }
+                    // APERAK
+                    if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_APERAK"){
+                        outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseAPERAK;
+                        testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
+                        let count = countAPERAKMessage("FTX+ABO", "RFF+", outputData.payload_ext);
+                        let cmpRule ={
+                            "seq": 0,
+                            "columnNm":"",
+                            "exptVal":"",
+                            "valueSrc":"",
+                            "skipCheck":false
+                        }
+                        if (count < 1){
+                            // to do ERROR
+                        }
+                        if (count == 1){
+
+                            testCaseUpdated.expResults[i].cmpRules.push(
+                                {   "seq": testCaseUpdated.expResults[i].cmpRules.length + 1,
+                                    "columnNm":"/APERAK/SG4/SG5[1]/RFF/C506/1154",
+                                    "exptVal":"",
+                                    "valueSrc":"",
+                                    "skipCheck":true
+                                });
+
+                            // let number = testCaseUpdated.expResults[i].cmpRules.length + 1;
+                            // let columnNm = "/APERAK/SG4/SG5[1]/RFF/C506/1154";
+                            // let skipCheck = true;
+                            
+                        }
+                        if (count > 1){
+                            for(let k=1; K<=count; k++){
+                                testCaseUpdated.expResults[i].cmpRules.push(
+                                {   "seq": testCaseUpdated.expResults[i].cmpRules.length + 1,
+                                    "columnNm":"/APERAK/SG4[" + k + "]/SG5[1]/RFF/C506/1154",
+                                    "exptVal":"",
+                                    "valueSrc":"",
+                                    "skipCheck":true
+                                });
+                            }
+                        }
+                    }
+                }
+
                 body = testCaseUpdated;
                 break;
 
@@ -174,6 +209,39 @@
         };
     }
 
+    // parse APERAK Message
+    function countAPERAKMessage(startsWith, endsWith, message){
+
+        let count = 0;
+
+        // remove line break
+        let string = message.toString().replace(/(\r\n|\n|\r)/gm, "");
+        let list = string.split("'");
+
+        let countFlag = false;
+
+        list.forEach(function (item, index){
+
+            // Switch On
+            if (!countFlag && item.startsWith(startsWith)){
+                countFlag = true;
+            }
+
+            // Switch Off
+            if (countFlag && item.startsWith(endsWith)){
+                countFlag = false;
+            }
+
+            // push the item
+            if (countFlag){
+                count++;
+            }
+        });
+
+        return count;
+    }
+    
+    
     // Copy From Template
     function copyFromTemplate(vizdata, testCaseId, constraints){
         // send copy request
