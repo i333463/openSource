@@ -148,6 +148,8 @@
                         "payload_ext":""
                     }
 
+                    let cmpRules = [];
+
                     console.log(testCaseUpdated.expResults[i]);
 
                     // CONTRL
@@ -165,13 +167,12 @@
 
                         // Delete comparison rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
                         let deletedCount = deleteCmpRules(data, testCaseUpdated.expResults[i].cmpRules);
-
-                        // Build new Comparison Rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
-                        let cmpRules = [];
+                        
 
                         // count of the aperak error messages
                         let count = countAPERAKMessage("FTX+ABO", "RFF+", outputData.payload_ext);
                         
+                        // Build new Comparison Rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
                         if (count < 1){
                             // to do ERROR
                         }
@@ -199,14 +200,14 @@
                                 );
                             }
                         }
-
-                        testCaseUpdated.expResults[i].cmpRules = cmpRules;
                     }
 
                     console.log(cmpRules);
 
                     // Check Points
                     testCaseUpdated.expResults[i].cp = null;
+                    // rules
+                    testCaseUpdated.expResults[i].cmpRules = cmpRules;
 
                 
                 }
