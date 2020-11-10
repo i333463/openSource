@@ -148,7 +148,7 @@
                         "payload_ext":""
                     }
 
-                    // console.log(testCaseUpdated.expResults[i]);
+                    console.log(testCaseUpdated.expResults[i]);
 
                     // CONTRL
                     if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_CONTRL"){
@@ -267,13 +267,13 @@
         let rules = []
 
         // Comparison Rules
-        for (i in cmpRules){
+        for (m in cmpRules){
 
             // to delete
-            if (cmpRules[i].columnNm.startsWith("/APERAK/SG4")
-                && cmpRules[i].columnNm.endsWith("/SG5[1]/RFF/C506/1154")){
+            if (cmpRules[m].columnNm.startsWith("/APERAK/SG4")
+                && cmpRules[m].columnNm.endsWith("/SG5[1]/RFF/C506/1154")){
                 // send delete request
-                let request = buildRequest("deleteRule", vizdata, cmpRules[i].ID, null, null);
+                let request = buildRequest("deleteRule", vizdata, cmpRules[m].ID, null, null);
                 odatajs.oData.request(
                     request, 
                     function (data, response) {
@@ -283,7 +283,7 @@
                 );
 
             }else{
-                rules.push(cmpRules[i]);
+                rules.push(cmpRules[m]);
             }
         }
 
