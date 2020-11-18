@@ -123,7 +123,7 @@
 
                 // Input
                 testCaseUpdated.input.techMessageId = data.messageRes.TechnicalMsgId;
-                        // "version": "5.2a",
+                testCaseUpdated.input.version = data.semanticVersion;
                 testCaseUpdated.input.businessIdentifier = data.messageRes.BusinessIdentifier;
                 testCaseUpdated.input.senderId = data.testCaseJSON.testData.sender;
                 testCaseUpdated.input.receiverId = data.testCaseJSON.testData.receiver;
@@ -360,7 +360,7 @@
         pm.getData(function (err, vizdata) {
 
             // Test Case Id (should be uniqua)
-            let testCaseId = "APERAK-" + vizdata.messageRes.TechnicalMsgId + "-" + vizdata.messageRes.BusinessIdentifier + "-" + tcname; 
+            let testCaseId = "APERAK-" + vizdata.messageRes.TechnicalMsgId + "-" + vizdata.semanticVersion + "-" + vizdata.messageRes.BusinessIdentifier + "-" + tcname; 
 
             // check Test Case exists or not
             let request = buildRequest("getTestCaseByName",vizdata, testCaseId, constraints, null);
