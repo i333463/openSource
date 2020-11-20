@@ -140,7 +140,13 @@
                     }
                 }
 
-                // Expected Result
+                // Allowed Expected Results List
+                let list_expResults = [ "Status_IFlow_Semantic_Validation_Complete",
+                                        "Status_Iflow_Run_Complete",
+                                        "EDIFACT_In_Resp_CONTRL",
+                                        "EDIFACT_In_Resp_APERAK"];
+                                        
+                let expectedResults = [];
                 for (i in testCaseUpdated.expResults){
 
                     // output data
@@ -148,16 +154,21 @@
                         "payload_ext":""
                     }
 
+                    // If the check point is not in the allowed List, ignore
+                    if (list_expResults.indexOf(testCaseUpdated.expResults[i].cp.checkpoint) < 0){
+                        continue;
+                    }
+
                     console.log(testCaseUpdated.expResults[i]);
 
-                    // CONTRL
+                    // Handle CONTRL
                     if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_CONTRL"){
                         // output data
                         outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseCONTRL;
                         testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
                     }
 
-                    // APERAK
+                    // Handle APERAK
                     if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_APERAK"){
                         // output data
                         outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseAPERAK;
@@ -209,7 +220,12 @@
                     // Check Points
                     testCaseUpdated.expResults[i].cp = null;
 
+                    expectedResults.push(testCaseUpdated.expResults[i]);
+
                 }
+
+                // Expected Results to be updated
+                testCaseUpdated.expResults = expectedResults;
 
                 body = testCaseUpdated;
                 break;
