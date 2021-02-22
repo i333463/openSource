@@ -141,10 +141,12 @@
                 }
 
                 // Allowed Expected Results List
-                let list_expResults = [ "Status_IFlow_Semantic_Validation_Complete",
-                                        "Status_Iflow_Run_Complete",
-                                        "EDIFACT_In_Resp_CONTRL",
-                                        "EDIFACT_In_Resp_APERAK"];
+                let list_expResults = [ "MMT_IFlow_Semantic_Validation_Complete",
+                                        "MMT_IFlow_Run_Complete",
+                                        "MMT_MsgRef_Resp_CONTRL",
+                                        "MMT_MsgRef_Resp_APERAK",
+                                        "MMT_EDIFACT_In_Resp_CONTRL_MsgRef",
+                                        "MMT_EDIFACT_In_Resp_APERAK_MsgRef"];
                                         
                 let expectedResults = [];
                 for (i in testCaseUpdated.expResults){
@@ -155,21 +157,21 @@
                     }
 
                     // If the check point is not in the allowed List, ignore
-                    if (list_expResults.indexOf(testCaseUpdated.expResults[i].cp.checkpoint) < 0){
-                        continue;
-                    }
+                    // if (list_expResults.indexOf(testCaseUpdated.expResults[i].cp.checkpoint) < 0){
+                    //     continue;
+                    // }
 
                     console.log(testCaseUpdated.expResults[i]);
 
                     // Handle CONTRL
-                    if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_CONTRL"){
+                    if (testCaseUpdated.expResults[i].cp.checkpoint == "MMT_EDIFACT_In_Resp_CONTRL_MsgRef"){
                         // output data
                         outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseCONTRL;
                         testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
                     }
 
                     // Handle APERAK
-                    if (testCaseUpdated.expResults[i].cp.checkpoint == "EDIFACT_In_Resp_APERAK"){
+                    if (testCaseUpdated.expResults[i].cp.checkpoint == "MMT_EDIFACT_In_Resp_APERAK_MsgRef"){
                         // output data
                         outputData.payload_ext = data.testCaseJSON.expectedTestResult.responseAPERAK;
                         testCaseUpdated.expResults[i].outputData = JSON.stringify(outputData);
@@ -191,7 +193,7 @@
                                     "seq": cmpRules.length + 1,
                                     "columnNm":"/APERAK/SG4/SG5[1]/RFF/C506/1154",
                                     "exptVal":"interchangeId",
-                                    "valueSrc":"",
+                                    "valueSrc":"TC.interchangeId",
                                     "skipCheck":true }
                             );   
                         }
@@ -206,7 +208,7 @@
                                         "seq": seq,
                                         "columnNm":"/APERAK/SG4[" + k + "]/SG5[1]/RFF/C506/1154",
                                         "exptVal":"interchangeId",
-                                        "valueSrc":"",
+                                        "valueSrc":"TC.interchangeId",
                                         "skipCheck":true }
                                 );
                             }
