@@ -163,6 +163,15 @@
 
                     console.log(testCaseUpdated.expResults[i]);
 
+                    // Handle APERAK message reference
+                    if (testCaseUpdated.expResults[i].cp.checkpoint == "MMT_MsgRef_Resp_APERAK"){
+                        // output data
+                        if (data.testCaseJSON.expectedTestResult.messageStatusDesc == "Postive CONTRL Sent"){
+                            testCaseUpdated.expResults[i].outputData = ""; // Clear output data
+                        }
+
+                    }
+
                     // Handle CONTRL
                     if (testCaseUpdated.expResults[i].cp.checkpoint == "MMT_EDIFACT_In_Resp_CONTRL_MsgRef"){
                         // output data
