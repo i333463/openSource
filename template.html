@@ -119,7 +119,7 @@
                 testCaseUpdated.createdBy = data.user;
                 testCaseUpdated.testCaseId = testCaseId;
                 testCaseUpdated.testCategory = "Regression";
-                testCaseUpdated.testVersion = "0.0.1";
+                testCaseUpdated.testVersion = data.semanticVersion;
 
                 // Input
                 testCaseUpdated.input.techMessageId = data.messageRes.TechnicalMsgId;
