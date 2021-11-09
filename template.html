@@ -119,11 +119,12 @@
                 testCaseUpdated.createdBy = data.user;
                 testCaseUpdated.testCaseId = testCaseId;
                 testCaseUpdated.testCategory = "Regression";
-                testCaseUpdated.testVersion = data.semanticVersion;
+                testCaseUpdated.testVersion = data.deliveryVersion;
 
                 // Input
                 testCaseUpdated.input.techMessageId = data.messageRes.TechnicalMsgId;
                 testCaseUpdated.input.version = data.semanticVersion;
+                testCaseUpdated.input.techVersion = data.technicalVersion;
                 testCaseUpdated.input.businessIdentifier = data.messageRes.BusinessIdentifier;
                 testCaseUpdated.input.senderId = data.testCaseJSON.testData.sender;
                 testCaseUpdated.input.receiverId = data.testCaseJSON.testData.receiver;
