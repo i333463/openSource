@@ -118,6 +118,7 @@
                 let testCaseUpdated = testCaseEntity;
                 testCaseUpdated.createdBy = data.user;
                 testCaseUpdated.testCaseId = testCaseId;
+                testCaseUpdated.testGroup = "APERAK_" + data.messageRes.TechnicalMsgId;
                 testCaseUpdated.testCategory = "Regression";
                 testCaseUpdated.testVersion = data.deliveryVersion;
 
