@@ -206,7 +206,15 @@
                                     "exptVal":"interchangeId",
                                     "valueSrc":"TC.interchangeId",
                                     "skipCheck":true }
-                            );   
+                            ); 
+                            cmpRules.push(
+                                {   "expRes_ID":testCaseUpdated.expResults[i].ID,
+                                    "seq": cmpRules.length + 1,
+                                    "columnNm":"/APERAK/SG4/SG5[2]/RFF/C506/1154",
+                                    "exptVal":"",
+                                    "valueSrc":"",
+                                    "skipCheck":true }
+                            );
                         }
 
                         // Build new Comparison Rules for "/APERAK/SG4*/SG5[1]/REF/C506/1154"
@@ -218,6 +226,15 @@
                                     {   "expRes_ID":testCaseUpdated.expResults[i].ID,
                                         "seq": seq,
                                         "columnNm":"/APERAK/SG4[" + k + "]/SG5[1]/RFF/C506/1154",
+                                        "exptVal":"interchangeId",
+                                        "valueSrc":"TC.interchangeId",
+                                        "skipCheck":true }
+                                );
+                                seq++;
+                                cmpRules.push(
+                                    {   "expRes_ID":testCaseUpdated.expResults[i].ID,
+                                        "seq": seq,
+                                        "columnNm":"/APERAK/SG4[" + k + "]/SG5[2]/RFF/C506/1154",
                                         "exptVal":"interchangeId",
                                         "valueSrc":"TC.interchangeId",
                                         "skipCheck":true }
